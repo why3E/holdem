@@ -4,6 +4,7 @@ from winsound import *
 from Card import *
 from Player import *
 import random
+from Configuration import *
 
 
 class BlackJack:
@@ -20,18 +21,28 @@ class BlackJack:
         self.player = Player("player")
         self.dealer = Player("dealer")
         self.betMoney = 0
+
         self.playerMoney = 1000
         self.Table = []
         self.LcardsPlayer = []
         self.LcardsDealer = []
         self.LcardsTable = []
         self.deckN = 0
-        self.setupDeck()
-
+        self.setMoney()
+        self.round = 0
         self.LbetMoney.configure(text="$" + str(self.betMoney))
         self.LplayerMoney.configure(text="You have $" + str(self.playerMoney))
 
         self.window.mainloop()
+
+    def setMoney(self):
+        self.betMoney +=10
+        self.playerMoney -=10
+        self.LbetMoney.configure(text="$" + str(self.betMoney))
+        self.LplayerMoney.configure(text="You have $" + str(self.playerMoney))
+
+
+
 
     def setupButton(self):
         self.Check = Button(self.window, text="Check", width=6, height=1, font=self.fontstyle2,
@@ -45,6 +56,7 @@ class BlackJack:
         self.Betx2.place(x=250, y=500)
         self.Deal = Button(self.window, text="Deal", width=6, height=1, font=self.fontstyle2, command=self.pressedDeal)
         self.Deal.place(x=600, y=500)
+
         self.Again = Button(self.window, text="Again", width=6, height=1, font=self.fontstyle2,
                             command=self.pressedAgain)
         self.Again.place(x=700, y=500)
@@ -54,18 +66,19 @@ class BlackJack:
         self.Again['state'] = 'disabled'
         self.Again['bg'] = 'gray'
 
+
     def setupLabel(self):
         self.LbetMoney = Label(text="$0", width=4, height=1, font=self.fontstyle, bg="green", fg="cyan")
         self.LbetMoney.place(x=200, y=450)
         self.LplayerMoney = Label(text="You have $1000", width=15, height=1, font=self.fontstyle, bg="green", fg="cyan")
         self.LplayerMoney.place(x=500, y=550)
 
-        self.LplayerPts = Label(text="", width=2, height=1, font=self.fontstyle2, bg="green", fg="orange")
+        self.LplayerPts = Label(text="", width=10, height=1, font=self.fontstyle2, bg="green", fg="orange")
         self.LplayerPts.place(x=400, y=350)
-        self.LdealerPts = Label(text="", width=2, height=1, font=self.fontstyle2, bg="green", fg="orange")
+        self.LdealerPts = Label(text="", width=10, height=1, font=self.fontstyle2, bg="green", fg="orange")
         self.LdealerPts.place(x=400, y=100)
-        self.LTablePts = Label(text="", width=3, height=2, font=self.fontstyle2, bg="green", fg="blue")
-        self.LTablePts.place(x=650, y=200)
+        self.LTablePts = Label(text="", width=6, height=2, font=self.fontstyle2, bg="green", fg="blue")
+        self.LTablePts.place(x=600, y=200)
 
         self.Lstatus = Label(text="", width=15, height=1, font=self.fontstyle, bg="green", fg="white")
         self.Lstatus.place(x=600, y=200)
@@ -75,13 +88,22 @@ class BlackJack:
         self.cardDeck = [i for i in range(52)]
         random.shuffle(self.cardDeck)
         self.deckN = 0
+        self.player.N=0
+        self.dealer.N=0
         self.hitPlayer(0)
         self.hitDealerDown(0)
         self.hitPlayer(1)
         self.hitDealerDown(1)
+        self.Check['state'] = 'active'
+        self.Check['bg'] = 'white'
+        self.Betx1['state'] = 'active'
+        self.Betx1['bg'] = 'white'
+        self.Betx2['state'] = 'active'
+        self.Betx2['bg'] = 'white'
 
-        self.betMoney = 10
-        self.playerMoney -= 10
+        self.Deal['state'] = 'disabled'
+        self.Deal['bg'] = 'gray'
+
 
     def pressedCheck(self):
         self.LbetMoney.configure(text="$" + str(self.betMoney))
@@ -101,7 +123,7 @@ class BlackJack:
         dealMoney = self.betMoney
         self.betMoney += self.betMoney
 
-        if self.betMoney <= self.playerMoney:
+        if dealMoney <= self.playerMoney:
             self.LbetMoney.configure(text="$" + str(self.betMoney))
             self.playerMoney -= dealMoney
             self.LplayerMoney.configure(text="You have $" + str(self.playerMoney))
@@ -121,7 +143,7 @@ class BlackJack:
         dealMoney = self.betMoney
         self.betMoney += dealMoney * 2
 
-        if 2 * self.betMoney <= self.playerMoney:
+        if 2 * dealMoney <= self.playerMoney:
             self.LbetMoney.configure(text="$" + str(self.betMoney))
             self.playerMoney -= dealMoney * 2
             self.LplayerMoney.configure(text="You have $" + str(self.playerMoney))
@@ -139,7 +161,10 @@ class BlackJack:
 
     def pressedDeal(self):
         if self.betMoney > 0:
+            if self.round == 0:
+                self.setupDeck()
             self.deal()
+
 
     def pressedAgain(self):
         self.Check['state'] = 'active'
@@ -157,6 +182,7 @@ class BlackJack:
         self.betMoney = 0
         self.LbetMoney.configure(text="$" + str(self.betMoney))
         self.Lstatus.configure(text="")
+        self.round =0
 
         for i in range(self.player.inHand()):
             self.LcardsPlayer[i].destroy()
@@ -170,6 +196,16 @@ class BlackJack:
         self.dealer.cards.clear()
         self.LdealerPts.configure(text="")
 
+        for i in range(5):
+            self.LcardsTable[i].destroy()
+        self.LcardsTable.clear()
+        self.Table.clear()
+        self.LTablePts.configure(text="")
+
+        self.setMoney()
+
+
+
     def hitDealerDown(self, n):
         newCard = Card(self.cardDeck[self.deckN])
         self.deckN += 1
@@ -181,8 +217,20 @@ class BlackJack:
         self.LcardsDealer[self.dealer.inHand() - 1].place(x=50 + n * 80, y=50)
 
     def deal(self):
-        if len(self.Table) == 0:
-            for i in range(3):
+        if self.round != 0:
+            if len(self.Table) == 0:
+                for i in range(3):
+                    newCard = Card(self.cardDeck[self.deckN])
+                    self.deckN += 1
+                    self.Table.append(newCard)
+                    p = PhotoImage(file="cards/" + newCard.filename())
+                    self.LcardsTable.append(Label(self.window, image=p))
+
+                    # 파이썬은 라벨 이미지 레퍼런스를 갖고 있어야 이미지가 보임
+                    self.LcardsTable[i].image = p
+                    self.LcardsTable[i].place(x=200 + i * 80, y=200)
+                    self.LTablePts.configure()
+            else:
                 newCard = Card(self.cardDeck[self.deckN])
                 self.deckN += 1
                 self.Table.append(newCard)
@@ -190,23 +238,14 @@ class BlackJack:
                 self.LcardsTable.append(Label(self.window, image=p))
 
                 # 파이썬은 라벨 이미지 레퍼런스를 갖고 있어야 이미지가 보임
-                self.LcardsTable[i].image = p
-                self.LcardsTable[i].place(x=200 + i * 80, y=200)
+                self.LcardsTable[len(self.Table) - 1].image = p
+                self.LcardsTable[len(self.Table) - 1].place(x=200 + (len(self.Table) - 1) * 80, y=200)
                 self.LTablePts.configure()
-        else:
-            newCard = Card(self.cardDeck[self.deckN])
-            self.deckN += 1
-            self.Table.append(newCard)
-            p = PhotoImage(file="cards/" + newCard.filename())
-            self.LcardsTable.append(Label(self.window, image=p))
 
-            # 파이썬은 라벨 이미지 레퍼런스를 갖고 있어야 이미지가 보임
-            self.LcardsTable[len(self.Table) - 1].image = p
-            self.LcardsTable[len(self.Table) - 1].place(x=200 + (len(self.Table) - 1) * 80, y=200)
-            self.LTablePts.configure()
+            PlaySound('sounds/cardFlip1.wav', SND_FILENAME)
 
-        PlaySound('sounds/cardFlip1.wav', SND_FILENAME)
-        if len(self.Table) == 5:
+        print(self.round)
+        if self.round == 3:
             self.checkWinner()
         else:
             self.Check['state'] = 'active'
@@ -218,6 +257,8 @@ class BlackJack:
 
             self.Deal['state'] = 'disabled'
             self.Deal['bg'] = 'gray'
+
+        self.round += 1
 
     def hitPlayer(self, n):
         newCard = Card(self.cardDeck[self.deckN])
@@ -242,13 +283,36 @@ class BlackJack:
         self.LcardsDealer[1].configure(image=p)  # 이미지 레퍼런스 변경
         self.LcardsDealer[1].image = p  # 파이썬은 라벨 이미지 레퍼런스를 갖고 있어야 이미지가 보임
 
-        self.LdealerPts.configure(text=str(self.dealer.value()), font=("Arial", 30, "bold"))
-        self.LplayerPts.configure(text=str(self.player.value()), font=("Arial", 30, "bold"))
+        Win_Lose = Configuration()
+        player_score = Win_Lose.score(self.player.cards, self.Table)
+        dealer_score = Win_Lose.score(self.dealer.cards, self.Table)
+
+        self.LplayerPts.configure(text=str(Win_Lose.hand_ranking[player_score]), font=("Arial", 20, "bold"))
+        self.LdealerPts.configure(text=str(Win_Lose.hand_ranking[dealer_score]), font=("Arial", 20, "bold"))
 
         # 승리 기준
 
-        self.LTablePts.configure(text="WIN", font=("Arial", 40, "bold"))
-        # self.LTablePts.configure(text="LOSE")
+        if player_score == 0 and dealer_score == 0:
+            player_card1 = self.player.cards[0].value
+            dealer_card1 = self.dealer.cards[0].value
+            player_card2 = self.player.cards[1].value
+            dealer_card2 = self.dealer.cards[1].value
+
+            # 최댓값 구하기
+            max_value = max(player_card1, dealer_card1, player_card2, dealer_card2)
+
+            # 최댓값이 플레이어의 카드인지 확인
+            if max_value in [player_card1, player_card2]:
+                player_score+=100
+        if player_score > dealer_score:
+            self.LTablePts.configure(text="WIN", font=("Arial", 40, "bold"))
+            self.playerMoney += self.betMoney*2
+        elif player_score < dealer_score:
+            self.LTablePts.configure(text="LOSE", font=("Arial", 40, "bold"))
+        else:
+            self.LTablePts.configure(text="DRAW", font=("Arial", 40, "bold"))
+            self.playerMoney += self.betMoney
+
 
         self.Deal['state'] = 'disabled'
         self.Deal['bg'] = 'gray'

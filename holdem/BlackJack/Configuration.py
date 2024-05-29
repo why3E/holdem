@@ -14,10 +14,11 @@ class Configuration:
         4: 'Straight',
         3: 'Triple',
         2: 'Two Pair',
-        1: 'One Pair'
+        1: 'One Pair',
+        0: 'no Pair'
     }
 
-    def score(cList, cCards):  # cList : 플레이어 카드 리스트, cCards : 커뮤니티 카드 리스트
+    def score(self,cList, cCards):  # cList : 플레이어 카드 리스트, cCards : 커뮤니티 카드 리스트
         c = cList + cCards
 
         xd = {i: [] for i in range(4)}
