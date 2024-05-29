@@ -21,34 +21,24 @@ class BlackJack:
         self.dealer = Player("dealer")
         self.betMoney = 0
         self.playerMoney = 1000
-        self.nCardsPlayer = 0
-        self.nCardsDealer = 0
         self.LcardsPlayer = []
         self.LcardsDealer = []
         self.deckN = 0
         self.window.mainloop()
 
     def setupButton(self):
-        self.B50 = Button(self.window, text="Bet 50", width=6, height=1, font=self.fontstyle2, command=self.pressedB50)
+        self.B50 = Button(self.window, text="Bet x2", width=6, height=1, font=self.fontstyle2, command=self.pressedB50)
         self.B50.place(x=50, y=500)
-        self.B10 = Button(self.window, text="Bet 10", width=6, height=1, font=self.fontstyle2, command=self.pressedB10)
+        self.B10 = Button(self.window, text="Bet x1", width=6, height=1, font=self.fontstyle2, command=self.pressedB10)
         self.B10.place(x=150, y=500)
-        self.B1 = Button(self.window, text="Bet 1", width=6, height=1, font=self.fontstyle2, command=self.pressedB1)
+        self.B1 = Button(self.window, text="Check", width=6, height=1, font=self.fontstyle2, command=self.pressedB1)
         self.B1.place(x=250, y=500)
-        self.Hit = Button(self.window, text="Hit", width=6, height=1, font=self.fontstyle2, command=self.pressedHit)
-        self.Hit.place(x=400, y=500)
-        self.Stay = Button(self.window, text="Stay", width=6, height=1, font=self.fontstyle2, command=self.pressedStay)
-        self.Stay.place(x=500, y=500)
         self.Deal = Button(self.window, text="Deal", width=6, height=1, font=self.fontstyle2, command=self.pressedDeal)
         self.Deal.place(x=600, y=500)
         self.Again = Button(self.window, text="Again", width=6, height=1, font=self.fontstyle2,
                             command=self.pressedAgain)
         self.Again.place(x=700, y=500)
 
-        self.Hit['state'] = 'disabled'
-        self.Hit['bg'] = 'gray'
-        self.Stay['state'] = 'disabled'
-        self.Stay['bg'] = 'gray'
         self.Deal['state'] = 'disabled'
         self.Deal['bg'] = 'gray'
         self.Again['state'] = 'disabled'
@@ -105,11 +95,6 @@ class BlackJack:
         else:
             self.betMoney -= 1
 
-    def pressedStay(self):
-        while self.dealer.value() < 17:
-            self.hitDealer(self.dealer.N - 1)
-        self.checkWinner()
-
     def pressedDeal(self):
         if self.betMoney > 0:
             self.deal()
@@ -121,10 +106,6 @@ class BlackJack:
         self.B10['bg'] = 'white'
         self.B1['state'] = 'active'
         self.B1['bg'] = 'white'
-        self.Hit['state'] = 'disabled'
-        self.Hit['bg'] = 'gray'
-        self.Stay['state'] = 'disabled'
-        self.Stay['bg'] = 'gray'
         self.Deal['state'] = 'disabled'
         self.Deal['bg'] = 'gray'
         self.Again['state'] = 'disabled'
@@ -147,7 +128,7 @@ class BlackJack:
         self.dealer.cards.clear()
         self.LdealerPts.configure(text="")
 
-    def hitDealerDown(self):
+    def hitDealerDown(self, n):
         newCard = Card(self.cardDeck[self.deckN])
         self.deckN += 1
         self.dealer.addCard(newCard)
@@ -155,17 +136,8 @@ class BlackJack:
         self.LcardsDealer.append(Label(self.window, image=p))
 
         self.LcardsDealer[self.dealer.inHand() - 1].image = p
-        self.LcardsDealer[self.dealer.inHand() - 1].place(x=250, y=150)
+        self.LcardsDealer[self.dealer.inHand() - 1].place(x=50 + n * 80, y=50)
 
-    def hitDealer(self, n):
-        newCard = Card(self.cardDeck[self.deckN])
-        self.deckN += 1
-        self.dealer.addCard(newCard)
-        p = PhotoImage(file="cards/" + newCard.filename())
-
-        self.LcardsDealer.append(Label(self.window, image=p))
-        self.LcardsDealer[self.dealer.inHand() - 1].image = p
-        self.LcardsDealer[self.dealer.inHand() - 1].place(x=250 + (n + 1) * 30, y=150)
 
     def deal(self):
         self.player.reset()
@@ -176,11 +148,9 @@ class BlackJack:
         self.deckN = 0
 
         self.hitPlayer(0)
-        self.hitDealerDown()
+        self.hitDealerDown(0)
         self.hitPlayer(1)
-        self.hitDealer(0)
-        self.nCardsPlayer = 1
-        self.nCardsDealer = 0
+        self.hitDealerDown(1)
 
         self.B50['state'] = 'disabled'
         self.B50['bg'] = 'gray'
@@ -188,10 +158,6 @@ class BlackJack:
         self.B10['bg'] = 'gray'
         self.B1['state'] = 'disabled'
         self.B1['bg'] = 'gray'
-        self.Hit['state'] = 'active'
-        self.Hit['bg'] = 'white'
-        self.Stay['state'] = 'active'
-        self.Stay['bg'] = 'white'
         self.Deal['state'] = 'disabled'
         self.Deal['bg'] = 'gray'
 
@@ -204,8 +170,8 @@ class BlackJack:
 
         # 파이썬은 라벨 이미지 레퍼런스를 갖고 있어야 이미지가 보임
         self.LcardsPlayer[self.player.inHand() - 1].image = p
-        self.LcardsPlayer[self.player.inHand() - 1].place(x=250 + n * 30, y=350)
-        self.LplayerPts.configure(text=str(self.player.value()))
+        self.LcardsPlayer[self.player.inHand() - 1].place(x=50 + n * 80, y=350)
+        self.LplayerPts.configure()
         PlaySound('sounds/cardFlip1.wav', SND_FILENAME)
 
     def pressedHit(self):
@@ -222,31 +188,8 @@ class BlackJack:
 
         self.LdealerPts.configure(text=str(self.dealer.value()))
 
-        if self.player.value() > 21:
-            self.Lstatus.configure(text="Player Busts")
-            PlaySound('sounds/wrong.wav', SND_FILENAME)
-        elif self.dealer.value() > 21:
-            self.Lstatus.configure(text="Dealer Busts")
-            self.playerMoney += self.betMoney * 2
-            PlaySound('sounds/win.wav', SND_FILENAME)
-        elif self.dealer.value() == self.player.value():
-            self.Lstatus.configure(text="Push")
-            self.playerMoney += self.betMoney
-        elif self.dealer.value() < self.player.value():
-            self.Lstatus.configure(text="You won!!")
-            self.playerMoney += self.betMoney * 2
-            PlaySound('sounds/win.wav', SND_FILENAME)
-        else:
-            self.Lstatus.configure(text="Sorry you lost!")
-            PlaySound('sounds/wrong.wav', SND_FILENAME)
-            self.betMoney = 0
-            self.LplayerMoney.configure(text="You have $" + str(self.playerMoney))
-            self.LbetMoney.configure(text="$" + str(self.betMoney))
+       #승리 기준
 
-        self.Hit['state'] = 'disabled'
-        self.Hit['bg'] = 'gray'
-        self.Stay['state'] = 'disabled'
-        self.Stay['bg'] = 'gray'
         self.Deal['state'] = 'disabled'
         self.Deal['bg'] = 'gray'
         self.Again['state'] = 'active'

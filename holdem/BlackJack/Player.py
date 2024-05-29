@@ -2,7 +2,6 @@ class Player:
     def __init__(self, name):
         self.name = name
         self.cards = []
-        self.N = 0  # 카드의 개수
 
     def inHand(self):  # 손에 들고 있는 카드의 개수
         return self.N
